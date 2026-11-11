@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SIS_GESTINVEN | Inventario</title>
+
+    <link rel="stylesheet" href="css/inventario.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <div>
+            <h1>GESTINVEN</h1>
+            <p>Consulta de inventario</p>
+        </div>
+
+        <a href="dashboard.html">
+            Volver 
+        </a>
+
+    </header>
+
+
+    <main class="contenido">
+
+        <section class="titulo">
+
+            <h2>Inventario de productos</h2>
+
+            <p>
+                Consulta del stock registrado y stock utilizable.
+            </p>
+
+        </section>
+
+
+        <section class="busqueda">
+
+            <input
+                type="text"
+                id="buscarInventario"
+                placeholder="Buscar por código o producto..."
+            >
+
+        </section>
+
+
+        <section class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>Unidad</th>
+                        <th>Stock actual</th>
+                        <th>Stock utilizable</th>
+                        <th>Stock seguridad</th>
+                        <th>Riesgo</th>
+                        <th>Recomendación</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaInventario">
+
+                    <tr>
+                        <td colspan="8">
+                            Cargando inventario...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/inventario.js"></script>
+
+</body>
+</html>

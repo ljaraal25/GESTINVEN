@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SIS_GESTINVEN | Consulta de producto</title>
+
+    <link rel="stylesheet" href="css/consulta.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <div>
+            <h1>GESTINVEN</h1>
+            <p>Consulta individual de predicción</p>
+        </div>
+
+        <a href="dashboard.html">
+            Volver 
+        </a>
+    </header>
+    <main class="contenido">
+
+        <section class="busqueda">
+
+            <h2>Consultar producto</h2>
+            <p>
+                Ingrese el código del producto.
+            </p>
+            <div class="fila-busqueda">
+                <input
+                    type="text"
+                    id="codigoProducto"
+                    placeholder="Ejemplo: 05335"
+                >
+                <button id="btnBuscar">
+                    Consultar
+                </button>
+            </div>
+
+            <p id="mensaje"></p>
+
+        </section>
+
+
+        <section
+            id="resultado"
+            class="resultado oculto"
+        >
+
+            <h2 id="nombreProducto">
+                Producto
+            </h2>
+
+            <p>
+                Código:
+                <strong id="codigoResultado"></strong>
+            </p>
+
+            <div class="tarjetas">
+
+                <div class="tarjeta">
+                    <span>Clase ABC</span>
+                    <strong id="abcResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Prediccion de demanda</span>
+                    <strong id="prediccionResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Stock utilizable</span>
+                    <strong id="stockResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Stock seguridad</span>
+                    <strong id="seguridadResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Reposición sugerida</span>
+                    <strong id="reposicionResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Riesgo</span>
+                    <strong id="riesgoResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Prioridad</span>
+                    <strong id="prioridadResultado">-</strong>
+                </div>
+
+                <div class="tarjeta">
+                    <span>Recomendación</span>
+                    <strong id="recomendacionResultado">-</strong>
+                </div>
+
+            </div>
+            <div class="accion-ml">
+                 <button id="btnPredecirML">
+                 Calcular predicción con ML
+                 </button>
+
+          <div id="resultadoML" class="resultado-ml oculto">
+
+    <!-- PREDICCIONES -->
+    <div class="predicciones-futuras">
+
+        <h3>Predicción de demanda</h3>
+
+        <p>
+            Demanda estimada para los próximos meses.
+        </p>
+
+        <table class="tabla-predicciones">
+
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Demanda prevista</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaPredicciones">
+            </tbody>
+        </table>
+<div class="stock-proyectado">
+
+    <h3>Proyección del inventario</h3>
+
+    <p class="texto-secundario">
+        Estimación del stock disponible si no se registran nuevas entradas.
+    </p>
+
+    <table class="tabla-stock-proyectado">
+
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Stock proyectado</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaStockProyectado">
+        </tbody>
+
+    </table>
+
+</div>
+    </div>
+
+
+    <!-- ESTADO DEL INVENTARIO -->
+    <div class="detalle-ml">
+        <h3>Estado del inventario</h3>
+        <p>
+            Stock utilizable:
+            <strong id="mlStock">-</strong>
+        </p>
+        <p>
+            Stock de seguridad:
+            <strong id="mlSeguridad">-</strong>
+        </p>
+        <p>
+            Reposición sugerida:
+            <strong id="mlReposicion">-</strong>
+        </p>
+    </div>
+
+
+    <!-- INFORMACIÓN DEL MODELO -->
+    <p class="modelo-usado">
+        Modelo utilizado: Random Forest
+    </p>
+
+
+    <!--
+        Estos elementos se mantienen ocultos porque
+        consulta.js todavía puede utilizarlos.
+    -->
+    <span id="valorPrediccionML" style="display:none;"></span>
+    <span id="mlObjetivo" style="display:none;"></span>
+
+</div>
+        </section>
+
+    </main>
+
+        <script src="js/auth.js"></script>
+        <script src="js/consulta.js"></script>
+
+</body>
+</html>

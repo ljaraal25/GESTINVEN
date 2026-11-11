@@ -1,0 +1,196 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f2f5f9;
+    color: #333;
+}
+
+.topbar {
+    background: #1f4e79;
+    color: white;
+    padding: 20px 40px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topbar h1 {
+    margin-bottom: 5px;
+}
+
+.topbar p {
+    font-size: 14px;
+}
+
+.topbar button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: #1f4e79;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.contenido {
+    padding: 35px;
+}
+
+.bienvenida {
+    margin-bottom: 30px;
+}
+
+.bienvenida h2 {
+    color: #1f4e79;
+    margin-bottom: 8px;
+}
+
+.tarjetas {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 20px;
+    margin-bottom: 35px;
+}
+
+.tarjeta {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tarjeta h3 {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.tarjeta p {
+    font-size: 30px;
+    font-weight: bold;
+    color: #1f4e79;
+}
+
+.acciones {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.boton-menu {
+    text-decoration: none;
+    background: #1f4e79;
+    color: white;
+
+    padding: 12px 20px;
+    border-radius: 7px;
+}
+
+.boton-menu:hover {
+    background: #163a5c;
+}
+.seccion-riesgos {
+    margin-bottom: 35px;
+}
+
+.seccion-riesgos h2,
+.modulos h2 {
+    color: #1f4e79;
+    margin-bottom: 18px;
+}
+
+.riesgos {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(160px, 1fr));
+
+    gap: 15px;
+}
+
+.riesgo-card {
+    background: white;
+    padding: 20px;
+    border-radius: 9px;
+
+    border-left: 5px solid #1f4e79;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.07);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.riesgo-card span {
+    font-weight: bold;
+    color: #555;
+}
+
+.riesgo-card strong {
+    font-size: 24px;
+    color: #1f4e79;
+}
+
+
+.modulos {
+    margin-top: 35px;
+}
+
+.modulos-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(240px, 1fr));
+
+    gap: 20px;
+}
+
+.modulo-card {
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    color: #333;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.08);
+
+    transition: 0.2s;
+}
+
+.modulo-card:hover {
+    transform: translateY(-3px);
+}
+
+.modulo-card h3 {
+    color: #1f4e79;
+    margin-bottom: 10px;
+}
+
+.modulo-card p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.modulo-card span {
+    color: #1f4e79;
+    font-weight: bold;
+}

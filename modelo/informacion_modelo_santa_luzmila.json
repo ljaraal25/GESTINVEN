@@ -1,0 +1,29 @@
+{
+    "modelo": "RandomForestRegressor",
+    "n_estimators": 500,
+    "max_depth": 12,
+    "min_samples_leaf": 2,
+    "random_state": 42,
+    "periodo_historico": "2025-09 a 2026-08",
+    "mes_predicho": "2026-09",
+    "granularidad": "Mensual por producto",
+    "variable_objetivo": "DEMANDA",
+    "features": [
+        "lag_1",
+        "lag_2",
+        "lag_3",
+        "lag_6",
+        "ma3",
+        "ma6",
+        "std3",
+        "std6",
+        "exp_mean",
+        "month_sin",
+        "month_cos"
+    ],
+    "metricas_validacion": {
+        "MAE": 22.85,
+        "RMSE": 138.82,
+        "WAPE": 30.45
+    }
+}
