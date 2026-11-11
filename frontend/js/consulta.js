@@ -60,13 +60,13 @@ async function buscarProducto() {
             "Consultando...";
 
         const respuesta = await fetch(
-            `http://127.0.0.1:8000/producto/${codigo}`
+            `https://api-gestinven.onrender.com/producto/${codigo}`
         );
 
         const datos = await respuesta.json();
 
 const respuestaPredicciones = await fetch(
-    `http://127.0.0.1:8000/predecir-periodo/${codigo}`
+    `https://api-gestinven.onrender.com/predecir-periodo/${codigo}`
 );
 
 const datosPredicciones = await respuestaPredicciones.json();
@@ -241,7 +241,7 @@ btnPredecirML.addEventListener(
             btnPredecirML.disabled = true;
 
             const respuesta = await fetch(
-                `http://127.0.0.1:8000/predecir/${codigo}`
+                `https://api-gestinven.onrender.com/predecir/${codigo}`
             );
 
             const datos =

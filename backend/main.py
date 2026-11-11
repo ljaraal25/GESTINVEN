@@ -15,15 +15,11 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500","null",
-    ],
+    allow_origins=["*"],  # Permite peticiones desde cualquier origen (incluyendo GitHub Pages)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Datos que recibirá el login
 class LoginRequest(BaseModel):
     usuario: str

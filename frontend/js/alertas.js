@@ -7,7 +7,7 @@ async function cargarAlertas() {
     try {
 
         const respuesta = await fetch(
-            "http://127.0.0.1:8000/alertas"
+            "https://api-gestinven.onrender.com/alertas"
         );
 
         const alertas =

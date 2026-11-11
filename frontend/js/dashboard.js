@@ -21,7 +21,7 @@ async function cargarResumen() {
     try {
 
         const respuesta = await fetch(
-            "http://127.0.0.1:8000/resumen"
+            "https://api-gestinven.onrender.com/resumen"
         );
 
         const datos = await respuesta.json();

@@ -12,7 +12,7 @@ async function cargarInventario() {
     try {
 
         const respuesta = await fetch(
-            "http://127.0.0.1:8000/inventario"
+            "https://api-gestinven.onrender.com/inventario"
         );
 
         inventario =
