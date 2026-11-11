@@ -65,7 +65,7 @@ async function cargarRiesgos() {
     try {
 
         const respuesta = await fetch(
-            "http://127.0.0.1:8000/riesgos-resumen"
+            "https://api-gestinven.onrender.com/riesgos-resumen"
         );
 
         const datos =
