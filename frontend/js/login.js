@@ -13,7 +13,7 @@ formulario.addEventListener("submit", async function (event) {
     try {
 
         const respuesta = await fetch(
-            "https://api-gestinven.onrender.com/login",
+            window.GESTINVEN_API_URL + "/login",
             {
                 method: "POST",
 
@@ -31,6 +31,10 @@ formulario.addEventListener("submit", async function (event) {
         const datos = await respuesta.json();
 
        if (datos.acceso) {
+    sessionStorage.removeItem("tokenEvaluacion");
+    if (datos.token_evaluacion) {
+        sessionStorage.setItem("tokenEvaluacion", datos.token_evaluacion);
+    }
 
     sessionStorage.setItem(
         "sesionActiva",

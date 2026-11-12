@@ -10,6 +10,8 @@ btnCerrarSesion.addEventListener(
             "sesionActiva"
         );
 
+        sessionStorage.removeItem("tokenEvaluacion");
+
         window.location.href =
             "../login/";
     }
@@ -21,7 +23,7 @@ async function cargarResumen() {
     try {
 
         const respuesta = await fetch(
-            "https://api-gestinven.onrender.com/resumen"
+            window.GESTINVEN_API_URL + "/resumen"
         );
 
         const datos = await respuesta.json();
@@ -65,7 +67,7 @@ async function cargarRiesgos() {
     try {
 
         const respuesta = await fetch(
-            "https://api-gestinven.onrender.com/riesgos-resumen"
+            window.GESTINVEN_API_URL + "/riesgos-resumen"
         );
 
         const datos =
