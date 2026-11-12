@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GESTINVEN | Dashboard</title>
+
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div>
+            <h1>GESTINVEN</h1>
+            <p>Panel del Jefe de Salud</p>
+        </div>
+
+        <button id="btnCerrarSesion">
+            Cerrar sesión
+        </button>
+    </header>
+
+    <main class="contenido">
+
+        <section class="bienvenida">
+            <h2>Resumen del inventario</h2>
+            <p>
+                Visualización general de demanda,
+                stock, alertas y predicciones.
+            </p>
+        </section>
+            <section class="tarjetas">
+
+            <div class="tarjeta">
+                <h3>Productos analizados</h3>
+                <p id="totalProductos">-</p>
+            </div>
+
+            <div class="tarjeta">
+                <h3>Demanda prevista</h3>
+                <p id="demandaPrevista">-</p>
+            </div>
+
+            <div class="tarjeta">
+                <h3>Productos críticos</h3>
+                <p id="productosCriticos">-</p>
+            </div>
+
+            <div class="tarjeta">
+                <h3>Productos a reponer</h3>
+                <p id="productosReponer">-</p>
+            </div>
+        </section>
+        <section class="seccion-riesgos">
+
+    <h2>Estado de riesgo del inventario</h2>
+
+    <div class="riesgos">
+
+        <div class="riesgo-card">
+            <span>Crítico</span>
+            <strong id="riesgoCritico">-</strong>
+        </div>
+
+        <div class="riesgo-card">
+            <span>Alto</span>
+            <strong id="riesgoAlto">-</strong>
+        </div>
+
+        <div class="riesgo-card">
+            <span>Medio</span>
+            <strong id="riesgoMedio">-</strong>
+        </div>
+
+        <div class="riesgo-card">
+            <span>Bajo</span>
+            <strong id="riesgoBajo">-</strong>
+        </div>
+
+    </div>
+
+</section>
+
+        <section class="modulos">
+
+    <h2>Consultas disponibles</h2>
+
+    <div class="modulos-grid">
+
+        <a
+            href="../inventario/"
+            class="modulo-card"
+        >
+            <h3>Inventario</h3>
+
+            <p>
+                Consultar stock actual,
+                stock utilizable y estado
+                de los productos.
+            </p>
+
+            <span>Ver inventario →</span>
+        </a>
+
+
+        <a
+            href="../predicciones/"
+            class="modulo-card"
+        >
+            <h3>Predicciones</h3>
+
+            <p>
+                Visualizar la demanda
+                prevista para septiembre
+                de 2026.
+            </p>
+
+            <span>Ver predicciones →</span>
+        </a>
+
+
+        <a
+            href="../alertas/"
+            class="modulo-card"
+        >
+            <h3>Alertas</h3>
+
+            <p>
+                Revisar productos con
+                riesgo y necesidad de
+                reposición.
+            </p>
+
+            <span>Ver alertas →</span>
+        </a>
+
+         <a
+            href="../consulta/"
+            class="modulo-card">
+          <h3>Consultar producto</h3>
+
+        <p>
+            Consultar rápidamente la predicción,
+            stock y recomendación de un producto.
+        </p>
+
+            <span>Consultar producto →</span>
+        </a>
+
+    </div>
+
+</section>
+
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SIS_GESTINVEN | Predicciones</title>
+
+    <link rel="stylesheet" href="../css/predicciones.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+
+        <div>
+            <h1>GESTINVEN</h1>
+            <p>Predicción de demanda e inventario</p>
+        </div>
+
+        <a href="../dashboard/">
+            Volver 
+        </a>
+
+    </header>
+
+
+    <main class="contenido">
+
+        <section class="titulo">
+
+            <h2>Predicciones de demanda</h2>
+            <p>
+                Predicción correspondiente a septiembre de 2026.
+            </p>
+        </section>
+        <section class="busqueda">
+            <input
+                type="text"
+                id="buscarProducto"
+                placeholder="Buscar por código o descripción..."
+            >
+        </section>
+
+       <section class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>ABC</th>
+                        <th>Predicción</th>
+                        <th>Stock utilizable</th>
+                        <th>Stock seguridad</th>
+                        <th>Reposición</th>
+                        <th>Riesgo</th>
+                        <th>Prioridad</th>
+                        <th>Recomendación</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaPredicciones">
+
+                    <tr>
+                        <td colspan="10">
+                            Cargando datos...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/predicciones.js"></script>
+
+</body>
+</html>

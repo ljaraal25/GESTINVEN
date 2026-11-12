@@ -11,7 +11,7 @@ btnCerrarSesion.addEventListener(
         );
 
         window.location.href =
-            "login.html";
+            "../login/";
     }
 );
 

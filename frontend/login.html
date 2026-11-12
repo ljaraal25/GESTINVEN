@@ -3,45 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>SIS_GESTINVEN | Inicio de sesión</title>
-    <link rel="stylesheet" href="css/login.css">
+    <meta http-equiv="refresh" content="0; url=./login/">
+    <title>GESTINVEN</title>
+    <script>window.location.replace('./login/' + window.location.search + window.location.hash);</script>
 </head>
-
 <body>
-    <div class="login-container">
-
-        <h1>GESTINVEN</h1>
-        <p>
-            Sistema de Gestión y Predicción de Inventarios
-        </p>
-        <h2>Inicio de sesión</h2>
-
-        <form id="formLogin">
-            <label for="usuario">
-                Usuario
-            </label>
-            <input
-                type="text"
-                id="usuario"
-                placeholder="Ingrese su usuario"
-                required
-            >
-            <label for="password">
-                Contraseña
-            </label>
-            <input
-                type="password"
-                id="password"
-                placeholder="Ingrese su contraseña"
-                required
-            >
-            <button type="submit">
-                Iniciar sesión
-            </button>
-        </form>
-        <p id="mensaje"></p>
-    </div>
-<script src="js/login.js"></script>
+    <p>Abriendo GESTINVEN... <a href="./login/">Continuar</a>.</p>
 </body>
 </html>

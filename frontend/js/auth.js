@@ -6,5 +6,5 @@ const sesionActiva =
 if (sesionActiva !== "true") {
 
     window.location.href =
-        "login.html";
+        "../login/";
 }

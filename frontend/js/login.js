@@ -43,7 +43,7 @@ formulario.addEventListener("submit", async function (event) {
     setTimeout(function () {
 
         window.location.href =
-            "dashboard.html";
+            "../dashboard/";
 
     }, 700);
 
