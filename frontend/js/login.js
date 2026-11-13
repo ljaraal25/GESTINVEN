@@ -8,6 +8,8 @@ formulario.addEventListener("submit", async function (event) {
     const usuario = document.getElementById("usuario").value;
     const password = document.getElementById("password").value;
 
+    sessionStorage.removeItem("tokenEvaluacion");
+    sessionStorage.removeItem("sesionActiva");
     mensaje.textContent = "Verificando...";
 
     try {
@@ -55,7 +57,7 @@ formulario.addEventListener("submit", async function (event) {
 
         } else {
 
-            mensaje.textContent = datos.mensaje;
+            mensaje.textContent = datos.detail || datos.mensaje || "No se pudo iniciar sesión.";
 
         }
 

@@ -1,5 +1,14 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+
+if __package__:
+    from .evaluacion_api import router as evaluation_router, issue_evaluation_token
+    from .usuarios import validar_credenciales
+    from .bitacora_supabase import registrar_inicio, ErrorBitacora
+else:
+    from evaluacion_api import router as evaluation_router, issue_evaluation_token
+    from usuarios import validar_credenciales
+    from bitacora_supabase import registrar_inicio, ErrorBitacora
 from pydantic import BaseModel
 
 import numpy as np
@@ -24,6 +33,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(evaluation_router)
+
 # Datos que recibirá el login
 class LoginRequest(BaseModel):
     usuario: str
@@ -40,20 +51,22 @@ def inicio():
 @app.post("/login")
 def login(datos: LoginRequest):
 
-    usuario_correcto = "jefe"
-    password_correcto = "1234"
-    if (
-        datos.usuario == usuario_correcto
-        and datos.password == password_correcto
-    ):
+    if validar_credenciales(datos.usuario, datos.password):
+        try:
+            auditoria = registrar_inicio(datos.usuario)
+        except ErrorBitacora:
+            raise HTTPException(status_code=503, detail="No se pudo registrar el acceso. Intente nuevamente en unos momentos.") from None
         return {
+            "auditoria": auditoria,
             "acceso": True,
+            "token_evaluacion": issue_evaluation_token(datos.usuario),
             "mensaje": "Inicio de sesión correcto"
         }
     return {
         "acceso": False,
         "mensaje": "Usuario o contraseña incorrectos"
     }
+    
 import pandas as pd
 from pathlib import Path
 
@@ -825,3 +838,42 @@ def calcular_stock_proyectado(
         })
 
     return resultados
+
+# Stock operativo importado: separado de los datos históricos de evaluación.
+if __package__:
+    from . import stock_api, stock_store
+else:
+    import stock_api, stock_store
+
+def catalogo_base_stock():
+    datos = pd.read_excel(ARCHIVO_RESULTADOS, sheet_name="Prediccion y Stock", engine="openpyxl")
+    catalogo = {}
+    for fila in datos.to_dict(orient="records"):
+        try:
+            codigo = stock_store.code(fila["CODIGO"])
+        except ValueError:
+            continue
+        def texto(nombre):
+            valor = fila.get(nombre)
+            return None if pd.isna(valor) else str(valor)
+        def numero(nombre):
+            valor = fila.get(nombre)
+            if pd.isna(valor):
+                return None
+            try:
+                valor = float(valor)
+                return valor if np.isfinite(valor) else None
+            except (ValueError, TypeError):
+                return None
+        catalogo[codigo] = {
+            "codigo": codigo, "descripcion": texto("DESCRIPCION") or "Sin descripción",
+            "unidad": texto("UNIDAD") or "Sin unidad", "clase_abc": texto("CLASE_ABC"),
+            "prediccion": numero("PREDICCION_SEP_2026"), "stock_actual": numero("STOCK_ACTUAL"),
+            "stock_utilizable": numero("STOCK_UTILIZABLE"), "stock_seguridad": numero("STOCK_SEGURIDAD"),
+            "reposicion": numero("REPOSICION_AJUSTADA"), "riesgo": texto("RIESGO"),
+            "prioridad": texto("PRIORIDAD"), "recomendacion": texto("RECOMENDACION")
+        }
+    return catalogo
+
+stock_api.configure(catalogo_base_stock, predecir_varios_meses, calcular_stock_proyectado)
+app.include_router(stock_api.router)

@@ -1,0 +1,11 @@
+
+data/evaluacion_auditoria.sqlite3*
+
+data/evaluacion.sqlite3.importando
+
+backend/__pycache__/
+
+data/stock_operativo.sqlite3*
+.env
+.env.*
+!.env.example

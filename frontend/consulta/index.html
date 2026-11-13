@@ -23,6 +23,19 @@
         </a>
     </header>
     <main class="contenido">
+<button id="btnCargarStock" type="button">Subir Excel de stock</button>
+<section id="panelCargaStock" hidden class="carga-stock">
+<h2>Actualizar stock desde Excel</h2>
+<p>Use un archivo .xlsx con las columnas CODIGO, DESCRIPCION (o PRODUCTO), UNIDAD, STOCK_ACTUAL, STOCK_UTILIZABLE y STOCK_SEGURIDAD. Máximo 8 MB y 10 000 productos, en la primera hoja.</p>
+<p>Las existencias del archivo reemplazan el stock de esos códigos; no se suman. Los productos no incluidos conservan sus datos. Cargar stock no agrega historial de demanda ni reentrena el modelo.</p>
+<input id="archivoStock" type="file" accept=".xlsx" aria-label="Archivo Excel de stock">
+<div><button id="validarStock" type="button">Validar Excel</button>
+<button id="confirmarStock" type="button" hidden>Confirmar carga y reemplazar stock</button>
+<button id="cancelarStock" type="button">Cancelar</button></div>
+<p id="estadoCargaStock" role="status" aria-live="polite"></p>
+<div class="carga-tabla"><table><thead><tr><th>Código</th><th>Producto</th><th>Stock anterior</th><th>Stock nuevo</th><th>Utilizable</th><th>Seguridad</th><th>Acción</th></tr></thead><tbody id="vistaStock"></tbody></table></div>
+<p><a href="../inventario/">Ver inventario actualizado</a></p>
+</section>
 
         <section class="busqueda">
 
@@ -60,7 +73,8 @@
                 <strong id="codigoResultado"></strong>
             </p>
 
-            <div class="tarjetas">
+            <p>Unidad: <strong id="unidadResultado"></strong></p>
+<div class="tarjetas"><div class="tarjeta"><span>Stock actual</span><strong id="stockActualResultado">-</strong></div>
 
                 <div class="tarjeta">
                     <span>Clase ABC</span>
@@ -194,8 +208,9 @@
 
     </main>
 
+        <script src="../js/config.js"></script>
         <script src="../js/auth.js"></script>
-        <script src="../js/consulta.js"></script>
+        <script src="../js/consulta.js?v=stock-20261112"></script>
 
 </body>
 </html>

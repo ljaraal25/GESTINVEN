@@ -9,15 +9,15 @@
 <main><span class="badge">Evaluación de resultados</span><h1>Pretest, postest y hallazgos</h1>
 <p>Consulte los movimientos históricos del almacén y contraste los resultados calculados con las fichas del Excel.</p>
 <p id="connection" role="status" class="notice">Conectando con la evaluación…</p>
-<section class="panel" aria-labelledby="weekly-title"><div class="section-head"><h2 id="weekly-title">Comparativo semanal</h2><button id="refresh-comparison">Actualizar comparativo</button></div>
-<div class="controls"><label>Indicador<select id="metric"><option value="quiebres">Quiebres de stock</option><option value="mermas">Mermas por vencimiento</option><option value="eficiencia">Eficiencia de control</option></select></label><span class="muted" id="direction"></span></div>
-<p class="muted">Se comparan semanas ordinales de períodos distintos. Pretest: 04/05–28/06/2026. Postest: 29/06–23/08/2026.</p>
-<div class="cards"><div><span>Semanas comparables</span><strong id="comparable">—</strong></div><div><span>Media pretest · semanas comparables</span><strong id="mean-pre">—</strong></div><div><span>Media postest · semanas comparables</span><strong id="mean-post">—</strong></div><div><span>Cambio post − pre (pp)</span><strong id="mean-change">—</strong></div></div>
-<p id="coverage" class="muted"></p><p class="muted">pp = puntos porcentuales. Las diferencias se calculan con las tasas sin redondear; pueden diferir en una centésima de la resta de los porcentajes mostrados.</p><div class="legend"><span><i class="pre"></i>Pretest calculado</span><span><i class="post"></i>Postest calculado</span></div>
+<section class="panel" aria-labelledby="weekly-title"><div class="section-head"><h2 id="weekly-title">Comparativo semanal</h2><div><button id="export-source-review">Descargar revisión de fuentes</button> <button id="refresh-comparison">Actualizar comparativo</button></div></div>
+<div class="controls"><label>Indicador<select id="metric"><option value="quiebres">Quiebres de stock</option><option value="mermas">Mermas por vencimiento</option><option value="eficiencia">Eficiencia de control</option></select></label><label>Fuente de los porcentajes<select id="comparison-source"><option value="sql">Revisión SQL</option><option value="excel">Ficha del Excel (reportado)</option></select></label></div>
+
+<div class="cards"><div><span>Semanas con cálculo comparable</span><strong id="comparable">—</strong></div><div><span>Media pretest · semanas comparables</span><strong id="mean-pre">—</strong></div><div><span>Media postest · semanas comparables</span><strong id="mean-post">—</strong></div><div><span>Cambio post − pre (pp)</span><strong id="mean-change">—</strong></div></div>
+<div class="legend"><span><i class="pre"></i><span id="legend-pre">Pretest calculado</span></span><span><i class="post"></i><span id="legend-post">Postest calculado</span></span></div>
 <svg id="chart" viewBox="0 0 880 280" role="img" aria-label="Comparación semanal de indicadores"></svg>
-<div class="table-wrap"><table><thead><tr><th>Semana</th><th>Pretest calculado</th><th>Postest calculado</th><th>Cambio (pp)</th><th>Excel pre → post</th><th>Conciliación</th><th>Detalle</th></tr></thead><tbody id="comparison"></tbody></table></div>
-<details><summary>Criterios de cálculo y límites</summary><div id="method"></div><p>La coincidencia con el Excel acredita una conciliación aritmética, no la autenticidad de los documentos ni la causalidad del cambio. El orden intradía se toma del número original y de la fila; debe contrastarse con el registro del almacén.</p></details>
-<p id="comparison-execution" class="muted"></p></section>
+<div class="table-wrap"><table><thead><tr><th>Semana</th><th>Pretest (%)</th><th>Postest (%)</th><th>Cambio (pp)</th><th>Observaciones</th><th>Detalle</th></tr></thead><tbody id="comparison"></tbody></table></div>
+
+</section>
 <section class="panel" id="query-panel" aria-labelledby="query-title"><h2 id="query-title">Consultar un hallazgo</h2>
 <form id="query-form"><div class="controls">
 <label>Consulta<select id="query"><option value="quiebres">Productos con quiebre</option><option value="cierres">Todos los cierres semanales</option><option value="mermas">Pérdidas por vencimiento</option><option value="aperturas">Aperturas reconstruidas</option><option value="errores">Incidencias y aperturas no verificables</option><option value="movimientos">Movimientos originales</option></select></label>
@@ -26,13 +26,12 @@
 <label>Código opcional<input id="code" inputmode="numeric" pattern="[0-9]{1,12}" maxlength="12" placeholder="Todos los productos"></label>
 <button class="primary" id="run" type="submit">Ejecutar consulta</button></div></form>
 <p id="query-message" role="status" class="muted">Seleccione los filtros y ejecute la consulta. Los resultados se actualizan al consultar.</p>
-<p class="muted">Las consultas de indicadores excluyen los movimientos marcados para depuración. “Movimientos originales” permite inspeccionar también los excluidos. Una fila del Excel es una referencia de origen, no un documento adjunto.</p>
+
 <div class="table-wrap"><table><thead id="result-head"></thead><tbody id="result-body"></tbody></table></div>
 <div class="section-head pagination"><div><button id="csv" disabled>Descargar página CSV</button><button id="receipt" disabled>Descargar ejecución JSON</button></div><div><button id="previous" disabled>Anterior</button><span id="page" class="muted"></span><button id="next" disabled>Siguiente</button></div></div>
 <p id="execution" class="muted" aria-live="polite"></p></section>
 <section class="panel"><div class="section-head"><h2>Bitácora de consultas</h2><button id="refresh-audit">Consultar bitácora</button></div>
 <p class="muted">Registra las consultas realizadas desde esta integración, con usuario, fecha y huella del resultado. No crea ni acredita operaciones históricas del postest.</p>
 <p id="audit-state" role="status" class="muted"></p><div class="table-wrap"><table><thead><tr><th>Fecha de ejecución (Lima)</th><th>Usuario</th><th>Consulta</th><th>Filtros</th><th>Filas totales</th><th>ID de ejecución</th></tr></thead><tbody id="audit-body"></tbody></table></div></section>
-<section class="panel"><h2>Fuente y revisiones pendientes</h2><p id="source"></p><p id="imported" class="muted"></p><details><summary>Huella del Excel y procedencia</summary><code id="source-hash"></code><p>Procedencia declarada: registros del almacén. Documentos originales pendientes de vinculación. La huella identifica la versión del archivo importado; no certifica su fecha histórica ni su autenticidad.</p></details>
-<details><summary id="issues-summary">Observaciones del Excel</summary><ul id="issues"></ul></details></section>
+
 </main></body></html>

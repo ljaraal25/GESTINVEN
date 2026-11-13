@@ -344,3 +344,6 @@ body {
 .tabla-stock-proyectado td:nth-child(3) {
     width: 45%;
 }
+.carga-stock{background:white;padding:22px;border:1px solid #dce5ed;border-radius:10px;margin:18px 0 28px}.carga-stock[hidden],.carga-stock [hidden]{display:none!important}.carga-stock p{margin:12px 0;line-height:1.5}.carga-stock button{margin:10px 8px 10px 0}.carga-tabla{overflow:auto}.carga-tabla table{border-collapse:collapse;width:100%;font-size:13px}.carga-tabla th,.carga-tabla td{padding:10px;border-bottom:1px solid #dce5ed;text-align:left}.carga-tabla th{background:#edf3f8}#estadoCargaStock{font-weight:bold}#btnCargarStock{margin-bottom:18px}
+
+#btnCargarStock,.carga-stock button{background:#214e77;color:white;border:0;border-radius:6px;padding:11px 16px;cursor:pointer}.carga-stock button:disabled{opacity:.55;cursor:wait}.carga-stock input[type=file]{max-width:100%;padding:10px 0}
