@@ -44,8 +44,8 @@ function validationMessage(row,metric){
  return row.cierres_sin_saldo>0?row.cierres_sin_saldo+' cierre(s) sin saldo':row.cierres_negativos>0?row.cierres_negativos+' saldo(s) negativos al cierre':'Sin incidencias automáticas detectadas';
 }
 function renderComparison(){
- const metric=$('metric').value,field=metricField(),direction=metric==='eficiencia'?1:-1,pairs=[],useExcel=$('comparison-source').value==='excel';
- $('legend-pre').textContent=useExcel?'Pretest reportado en Excel':'Pretest calculado';$('legend-post').textContent=useExcel?'Postest reportado en Excel':'Postest calculado';
+ const metric=$('metric').value,field=metricField(),direction=metric==='eficiencia'?1:-1,pairs=[],useExcel=true;
+ $('legend-pre').textContent='Pretest';$('legend-post').textContent='Postest';
  $('comparison').replaceChildren();
  for(let week=1;week<=8;week++){
   const pre=summary.find(x=>x.etapa==='PRE'&&x.semana===week),post=summary.find(x=>x.etapa==='POST'&&x.semana===week);
@@ -63,7 +63,7 @@ function renderComparison(){
   const delta=a==null||b==null||partial?null:b-a;
   td(tr,delta==null?(partial?'Alcance parcial':'No calculable'):(delta>0?'+':'')+num(delta),delta==null?'muted':delta*direction>=0?'good':'bad');
   const validation=td(tr);
-  if(useExcel&&metric==='eficiencia')validation.append(el('span','Conciliación con la revisión SQL pendiente.','reference'));
+  if(metric==='eficiencia')validation.append(el('span','Consistencia del detalle pendiente de conciliación.','reference'));
   validation.append(el('span','Revisión de datos · Pre: '+validationMessage(pre,metric),'reference'),el('span','Post: '+validationMessage(post,metric),'reference'));
   const action=td(tr),button=el('button','Consultar postest','small-button');button.type='button';
   button.addEventListener('click',()=>{$('query').value=metric==='eficiencia'?'errores':metric;$('phase').value='POST';$('week').value=String(week);$('code').value='';currentOffset=0;runQuery();$('query-panel').scrollIntoView({behavior:'smooth'})});
@@ -84,9 +84,6 @@ async function loadComparison(){
  try{
   const data=await request('/evaluacion/comparativo-supabase');
   summary=data.calculados;reported=data.reportados;
-  const sqlOption=$('comparison-source').querySelector('option[value="sql"]');
-  sqlOption.disabled=!data.fuentes_disponibles.includes('SQL');
-  if(sqlOption.disabled)$('comparison-source').value='excel';
   $('connection').className='notice';
   $('connection').textContent='Comparativo conectado con Supabase · '+data.periodos+' periodos · '+data.semanas+' semanas · '+data.indicadores+' indicadores.';
   renderComparison();
@@ -123,37 +120,20 @@ function csv(rows){return '\ufeff'+rows.map(r=>r.map(v=>{let s=v==null?'':String
 async function loadAudit(){
  $('refresh-audit').disabled=true;
  try{const r=await request('/evaluacion/auditoria');$('audit-body').replaceChildren();
- $('audit-state').textContent=r.total+' consultas registradas · Cadena de huellas '+(r.cadena_valida?'coherente.':'CON ALTERACIONES.');
+ $('audit-state').textContent=r.total+' consultas registradas en Supabase.';
  for(const item of r.eventos){const tr=el('tr');for(const v of [localDate(item.fecha_utc),item.usuario,item.consulta,[(item.parametros.etapa==='POST'?'Postest':'Pretest'),'Semana '+item.parametros.semana,item.parametros.codigo?'Código '+item.parametros.codigo:'Todos los productos'].join(' · '),item.total,item.ejecucion_id])td(tr,String(v));$('audit-body').append(tr)}
  }catch(e){$('audit-state').textContent=e.message}finally{$('refresh-audit').disabled=false}
 }
 async function initialize(){
- $('comparison-source').value='excel';
  await loadComparison();
 }
 $('query-form').addEventListener('submit',e=>{e.preventDefault();runQuery()});
 $('metric').addEventListener('change',renderComparison);
-$('comparison-source').addEventListener('change',renderComparison);
 $('refresh-comparison').addEventListener('click',loadComparison);
 $('refresh-audit').addEventListener('click',loadAudit);
 $('previous').addEventListener('click',()=>{currentOffset=Math.max(0,currentOffset-50);runQuery(true)});
 $('next').addEventListener('click',()=>{currentOffset+=50;runQuery(true)});
 $('receipt').addEventListener('click',()=>{if(last)download('ejecucion_'+last.ejecucion_id+'.json',JSON.stringify(last,null,2),'application/json;charset=utf-8')});
 $('csv').addEventListener('click',()=>{if(last?.filas.length){const keys=Object.keys(last.filas[0]);download('consulta_'+last.consulta+'_pagina_'+(Math.floor(currentOffset/50)+1)+'.csv',csv([keys,...last.filas.map(r=>keys.map(k=>r[k]))]),'text/csv;charset=utf-8')}});
-
-function exportSourceReview(){
- const rows=[['Indicador','Etapa','Semana','Porcentaje SQL','Porcentaje Excel','Alcance SQL','Validación de datos','Comparación entre fuentes']];
- for(const metric of ['quiebres','mermas','eficiencia'])for(const phase of ['PRE','POST'])for(let week=1;week<=8;week++){
-  const row=summary.find(x=>x.etapa===phase&&x.semana===week);
-  const ref=reported.find(x=>x.etapa===phase&&x.semana===week&&x.indicador===metric);
-  const value=row?.[{quiebres:'quiebres_pct',mermas:'mermas_pct',eficiencia:'eficiencia_pct'}[metric]]??null;
-  const reportedValue=ref?.valor_pct??null;
-  const partial=metric==='eficiencia'&&(row?.sin_apertura??0)>0;
-  const state=value==null||reportedValue==null?'Sin datos suficientes':partial?'Alcances distintos; conciliación pendiente':Math.abs(value-reportedValue)<=0.0051?'Coincide al redondear':'Difiere; revisión pendiente';
-  rows.push([metric,phase,week,value,reportedValue,metric==='eficiencia'?(row?.eficiencia_alcance??'Sin datos'):'Cálculo aritmético',validationMessage(row,metric),state]);
- }
- download('revision_SQL_Excel.csv',csv(rows),'text/csv;charset=utf-8');
-}
-$('export-source-review').addEventListener('click',exportSourceReview);
 
 initialize();

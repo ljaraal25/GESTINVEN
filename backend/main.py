@@ -877,3 +877,13 @@ def catalogo_base_stock():
 
 stock_api.configure(catalogo_base_stock, predecir_varios_meses, calcular_stock_proyectado)
 app.include_router(stock_api.router)
+
+# Los errores de la base central no exponen claves ni consultas privadas.
+if __package__:
+    from .supabase_db import CloudError
+else:
+    from supabase_db import CloudError
+from fastapi.responses import JSONResponse
+@app.exception_handler(CloudError)
+async def error_base_central(request, exc):
+    return JSONResponse(status_code=503, content={"detail": str(exc)})

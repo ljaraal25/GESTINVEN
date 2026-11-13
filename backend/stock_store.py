@@ -1,10 +1,12 @@
-"""Stock operativo: importación de existencias absolutas, con vista previa y auditoría."""
+"""Importación de stock con persistencia y confirmación atómica en Supabase."""
 from pathlib import Path
-from contextlib import contextmanager
-from datetime import datetime,timezone
-import os,sqlite3,json,time,uuid,hashlib,io,zipfile,unicodedata,re,math
+import json,time,uuid,hashlib,io,zipfile,unicodedata,re,math
 import openpyxl
 from xml.etree.ElementTree import ParseError
+if __package__:
+ from . import supabase_db as db
+else:
+ import supabase_db as db
 MAX_FILE=8*1024*1024
 FIELDS=('codigo','descripcion','unidad','stock_actual','stock_utilizable','stock_seguridad')
 ALIASES={'CODIGO':'codigo','CODIGO PRODUCTO':'codigo','PRODUCTO':'descripcion','DESCRIPCION':'descripcion','NOMBRE DEL PRODUCTO':'descripcion','UNIDAD':'unidad','STOCK ACTUAL':'stock_actual','STOCK':'stock_actual','STOCK UTILIZABLE':'stock_utilizable','STOCK SEGURIDAD':'stock_seguridad','STOCK DE SEGURIDAD':'stock_seguridad'}
@@ -15,24 +17,7 @@ def code(v):
     return s.zfill(5) if s.isdigit() else s
 def key(v):
     return ' '.join(''.join(x for x in unicodedata.normalize('NFD',str(v or '')) if unicodedata.category(x)!='Mn').upper().replace('_',' ').split())
-def now():return datetime.now(timezone.utc).isoformat()
-def path():return Path(os.environ.get('GESTINVEN_STOCK_DB',str(Path(__file__).resolve().parent.parent/'data/stock_operativo.sqlite3'))).resolve()
-@contextmanager
-def connect():
-    p=path();p.parent.mkdir(parents=True,exist_ok=True)
-    db=sqlite3.connect(p,timeout=15);db.row_factory=sqlite3.Row
-    try:
-        db.executescript("""
-CREATE TABLE IF NOT EXISTS productos(codigo TEXT PRIMARY KEY,contenido TEXT NOT NULL,revision TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS previas(id TEXT PRIMARY KEY,usuario TEXT NOT NULL,creado REAL NOT NULL,archivo TEXT NOT NULL,sha256 TEXT NOT NULL,contenido TEXT NOT NULL,aplicado INTEGER NOT NULL DEFAULT 0);
-CREATE TABLE IF NOT EXISTS importaciones(id TEXT PRIMARY KEY,fecha_utc TEXT NOT NULL,usuario TEXT NOT NULL,archivo TEXT NOT NULL,sha256 TEXT NOT NULL,nuevos INTEGER NOT NULL,actualizados INTEGER NOT NULL);
-CREATE TABLE IF NOT EXISTS cambios(id INTEGER PRIMARY KEY,importacion_id TEXT NOT NULL,codigo TEXT NOT NULL,antes_json TEXT,despues_json TEXT NOT NULL);
-""")
-        yield db
-    finally:db.close()
-def existing(db,c):
-    row=db.execute('SELECT contenido,revision FROM productos WHERE codigo=?',(c,)).fetchone()
-    return (json.loads(row['contenido']),row['revision']) if row else (None,None)
+
 def parse(raw):
     if len(raw)>MAX_FILE:raise ValueError('El archivo supera 8 MB.')
     try:
@@ -80,46 +65,28 @@ def parse(raw):
         if not result and not errors:raise ValueError('El archivo no tiene productos.')
     finally:wb.close()
     return result,errors
+
 def preview(raw,filename,user,base):
-    rows,errors=parse(raw)
-    if errors:return {'valido':False,'errores':errors[:100],'total_errores':len(errors),'productos':len(rows)}
-    created=updated=0;plan=[]
-    with connect() as db:
-        for row in rows:
-            previous,revision=existing(db,row['codigo'])
-            before=previous or base.get(row['codigo'])
-            isnew=before is None
-            created+=isnew;updated+=not isnew
-            plan.append({'despues':row,'antes':before,'revision':revision,'nuevo':isnew})
-        id=str(uuid.uuid4());digest=hashlib.sha256(raw).hexdigest()
-        db.execute('INSERT INTO previas VALUES(?,?,?,?,?,?,0)',(id,user,time.time(),Path(filename).name[:180],digest,json.dumps(plan,ensure_ascii=False)))
-        db.commit()
-    return {'valido':True,'id':id,'nuevos':created,'actualizados':updated,'total':len(rows),'archivo':Path(filename).name[:180],'sha256':digest,
-            'muestra':[{'codigo':p['despues']['codigo'],'descripcion':p['despues']['descripcion'],'stock_anterior':p['antes'].get('stock_actual') if p['antes'] else None,'stock_nuevo':p['despues']['stock_actual'],'utilizable':p['despues']['stock_utilizable'],'seguridad':p['despues']['stock_seguridad'],'accion':'Nuevo' if p['nuevo'] else 'Actualizar'} for p in plan[:100]]}
+ rows,errors=parse(raw)
+ if errors:return {'valido':False,'errores':errors[:100],'total_errores':len(errors),'productos':len(rows)}
+ current={r['codigo']:r for r in db.todos('productos_stock',{'select':'*','order':'codigo.asc'})}
+ created=updated=0;plan=[]
+ for row in rows:
+  previous=current.get(row['codigo']);before=previous['contenido'] if previous else base.get(row['codigo']);isnew=before is None
+  created+=isnew;updated+=not isnew
+  plan.append({'despues':row,'antes':before,'revision':previous['revision'] if previous else None,'nuevo':isnew})
+ id=str(uuid.uuid4());digest=hashlib.sha256(raw).hexdigest();name=Path(filename).name[:180]
+ db.enviar('previas_stock','POST',body={'id':id,'usuario':user,'creado':time.time(),'archivo':name,'sha256':digest,'contenido':plan,'aplicado':False},prefer='return=minimal')
+ return {'valido':True,'id':id,'nuevos':created,'actualizados':updated,'total':len(rows),'archivo':name,'sha256':digest,'muestra':[{'codigo':p['despues']['codigo'],'descripcion':p['despues']['descripcion'],'stock_anterior':p['antes'].get('stock_actual') if p['antes'] else None,'stock_nuevo':p['despues']['stock_actual'],'utilizable':p['despues']['stock_utilizable'],'seguridad':p['despues']['stock_seguridad'],'accion':'Nuevo' if p['nuevo'] else 'Actualizar'} for p in plan[:100]]}
 def confirm(id,user):
-    with connect() as db:
-        db.execute('BEGIN IMMEDIATE')
-        record=db.execute('SELECT * FROM previas WHERE id=? AND usuario=?',(id,user)).fetchone()
-        if not record:raise ValueError('Vista previa no encontrada.')
-        if record['aplicado']:raise ValueError('Esta carga ya fue aplicada.')
-        if time.time()-record['creado']>1800:raise ValueError('Vista previa vencida; valide otra vez el archivo.')
-        plan=json.loads(record['contenido'])
-        for p in plan:
-            _,revision=existing(db,p['despues']['codigo'])
-            if revision!=p['revision']:raise ValueError('El stock cambió desde la vista previa. Valide otra vez.')
-        timestamp=now()
-        for p in plan:
-            row=p['despues'];row['actualizado_utc']=timestamp;row['importacion_id']=id
-            content=json.dumps(row,ensure_ascii=False)
-            db.execute('INSERT INTO productos VALUES(?,?,?) ON CONFLICT(codigo) DO UPDATE SET contenido=excluded.contenido,revision=excluded.revision',(row['codigo'],content,id))
-            db.execute('INSERT INTO cambios(importacion_id,codigo,antes_json,despues_json) VALUES(?,?,?,?)',(id,row['codigo'],json.dumps(p['antes'],ensure_ascii=False),content))
-        nuevos=sum(p['nuevo'] for p in plan)
-        db.execute('INSERT INTO importaciones VALUES(?,?,?,?,?,?,?)',(id,timestamp,user,record['archivo'],record['sha256'],nuevos,len(plan)-nuevos))
-        db.execute('UPDATE previas SET aplicado=1 WHERE id=?',(id,));db.commit()
-    return {'guardado':True,'id':id,'fecha_utc':timestamp,'nuevos':nuevos,'actualizados':len(plan)-nuevos,'total':len(plan)}
+ try:uuid.UUID(id)
+ except ValueError:raise ValueError('Vista previa no válida.') from None
+ try:return db.rpc('gest_stock_confirmar',{'p_id':id,'p_usuario':user})
+ except db.CloudError as exc:
+  if exc.status==400:raise ValueError(str(exc)) from None
+  raise
 def merged(base):
-    out={k:dict(v) for k,v in base.items()}
-    with connect() as db:
-        for row in db.execute('SELECT contenido FROM productos'):
-            p=json.loads(row[0]);p['importado']=True;out[p['codigo']]={**out.get(p['codigo'],{}),**p}
-    return out
+ out={k:dict(v) for k,v in base.items()}
+ for r in db.todos('productos_stock',{'select':'codigo,contenido','order':'codigo.asc'}):
+  product={**r['contenido'],'importado':True};out[r['codigo']]={**out.get(r['codigo'],{}),**product}
+ return out

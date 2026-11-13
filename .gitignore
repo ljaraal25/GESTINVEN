@@ -9,3 +9,5 @@ data/stock_operativo.sqlite3*
 .env
 .env.*
 !.env.example
+# Respaldos de bases anteriores no forman parte del sistema activo.
+data/*.sqlite3*

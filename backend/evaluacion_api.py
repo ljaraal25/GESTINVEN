@@ -1,5 +1,5 @@
 """API de consultas predefinidas: datos privados, SQL parametrizado y sesión firmada."""
-import base64, hashlib, hmac, json, os, secrets, sqlite3, time, logging
+import base64, hashlib, hmac, json, os, secrets, time, logging
 from typing import Literal
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 if __package__:
@@ -33,11 +33,8 @@ def no_cache(response):
     response.headers["Cache-Control"]="no-store"
 def run_safe(fn):
     try: return fn()
-    except FileNotFoundError:
-        raise HTTPException(status_code=503,detail="La base SQLite de evaluación todavía no está instalada en este servidor.") from None
-    except sqlite3.Error:
-        logging.exception("Error de SQLite de evaluación")
-        raise HTTPException(status_code=503,detail="No se pudo consultar la base de evaluación.") from None
+    except store.CloudError as exc:
+        raise HTTPException(status_code=503,detail=str(exc)) from None
 
 @router.get("/fuente")
 def fuente(response: Response,user: str=Depends(require_user)):
@@ -55,7 +52,7 @@ def consultar(response: Response,
     result=run_safe(lambda:store.execute(consulta,etapa,semana,codigo,limite,desplazamiento))
     try:
         result["auditoria"]=store.log_execution(result,user)
-    except (OSError,sqlite3.Error,ValueError):
+    except (store.CloudError,ValueError):
         logging.exception("No se pudo guardar la bitácora de evaluación")
         result["auditoria"]={"guardada":False,"mensaje":"La consulta se ejecutó, pero la bitácora no pudo guardarse."}
     return result
@@ -64,7 +61,7 @@ def consultar(response: Response,
 def auditoria(response: Response,user: str=Depends(require_user)):
     no_cache(response)
     try: return store.audit_events()
-    except (OSError,sqlite3.Error,ValueError):
+    except (store.CloudError,ValueError):
         raise HTTPException(status_code=503,detail="No se pudo revisar la bitácora.") from None
 
 
