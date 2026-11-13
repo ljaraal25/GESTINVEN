@@ -4,16 +4,16 @@
 <link rel="stylesheet" href="../css/evaluacion.css">
 <script src="../js/config.js"></script>
 <script src="../js/auth.js"></script>
-<script src="../js/evaluacion.js" defer></script></head>
+<script src="../js/evaluacion.js?v=supabase-comparativo-20261113" defer></script></head>
 <body><header><div><strong>GESTINVEN</strong><p>Evaluación de inventarios</p></div><a href="../dashboard/">Volver al dashboard</a></header>
 <main><span class="badge">Evaluación de resultados</span><h1>Pretest, postest y hallazgos</h1>
 <p>Consulte los movimientos históricos del almacén y contraste los resultados calculados con las fichas del Excel.</p>
 <p id="connection" role="status" class="notice">Conectando con la evaluación…</p>
 <section class="panel" aria-labelledby="weekly-title"><div class="section-head"><h2 id="weekly-title">Comparativo semanal</h2><div><button id="export-source-review">Descargar revisión de fuentes</button> <button id="refresh-comparison">Actualizar comparativo</button></div></div>
-<div class="controls"><label>Indicador<select id="metric"><option value="quiebres">Quiebres de stock</option><option value="mermas">Mermas por vencimiento</option><option value="eficiencia">Eficiencia de control</option></select></label><label>Fuente de los porcentajes<select id="comparison-source"><option value="sql">Revisión SQL</option><option value="excel">Ficha del Excel (reportado)</option></select></label></div>
+<div class="controls"><label>Indicador<select id="metric"><option value="quiebres">Quiebres de stock</option><option value="mermas">Mermas por vencimiento</option><option value="eficiencia">Eficiencia de control</option></select></label><label>Fuente de los porcentajes<select id="comparison-source"><option value="sql">Revisión SQL</option><option value="excel" selected>Ficha del Excel (reportado)</option></select></label></div>
 
 <div class="cards"><div><span>Semanas con cálculo comparable</span><strong id="comparable">—</strong></div><div><span>Media pretest · semanas comparables</span><strong id="mean-pre">—</strong></div><div><span>Media postest · semanas comparables</span><strong id="mean-post">—</strong></div><div><span>Cambio post − pre (pp)</span><strong id="mean-change">—</strong></div></div>
-<div class="legend"><span><i class="pre"></i><span id="legend-pre">Pretest calculado</span></span><span><i class="post"></i><span id="legend-post">Postest calculado</span></span></div>
+<div class="legend"><span><i class="pre"></i><span id="legend-pre">Pretest reportado en Excel</span></span><span><i class="post"></i><span id="legend-post">Postest reportado en Excel</span></span></div>
 <svg id="chart" viewBox="0 0 880 280" role="img" aria-label="Comparación semanal de indicadores"></svg>
 <div class="table-wrap"><table><thead><tr><th>Semana</th><th>Pretest (%)</th><th>Postest (%)</th><th>Cambio (pp)</th><th>Observaciones</th><th>Detalle</th></tr></thead><tbody id="comparison"></tbody></table></div>
 

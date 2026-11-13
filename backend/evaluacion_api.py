@@ -5,9 +5,11 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 if __package__:
     from . import evaluacion_store as store
     from .usuarios import usuario_habilitado
+    from . import comparativo_supabase as comparativo_cloud
 else:
     import evaluacion_store as store
     from usuarios import usuario_habilitado
+    import comparativo_supabase as comparativo_cloud
 router=APIRouter(prefix="/evaluacion",tags=["Evaluación SQL"])
 _SECRET=os.environ.get("GESTINVEN_SESSION_SECRET")
 _KEY=hashlib.sha256(_SECRET.encode()).digest() if _SECRET else secrets.token_bytes(32)
@@ -64,3 +66,12 @@ def auditoria(response: Response,user: str=Depends(require_user)):
     try: return store.audit_events()
     except (OSError,sqlite3.Error,ValueError):
         raise HTTPException(status_code=503,detail="No se pudo revisar la bitácora.") from None
+
+
+@router.get('/comparativo-supabase')
+def comparativo_supabase(response: Response,user: str=Depends(require_user)):
+    no_cache(response)
+    try:
+        return comparativo_cloud.cargar_comparativo()
+    except comparativo_cloud.ErrorComparativo as exc:
+        raise HTTPException(status_code=503,detail=str(exc)) from None

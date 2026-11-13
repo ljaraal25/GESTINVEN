@@ -70,7 +70,9 @@ function renderComparison(){
   action.append(button);$('comparison').append(tr);
  }
  const comparable=pairs.filter(p=>p.comparable),n=comparable.length,calculable=pairs.filter(p=>p.pre!=null&&p.post!=null).length;
- const a=n?comparable.reduce((s,p)=>s+p.pre,0)/n:null,b=n?comparable.reduce((s,p)=>s+p.post,0)/n:null;
+ // Las tasas en Supabase tienen cinco decimales; sumar en esa escala evita errores de punto flotante en las medias.
+ const mean=key=>n?comparable.reduce((sum,p)=>sum+Math.round(p[key]*100000),0)/(n*100000):null;
+ const a=mean('pre'),b=mean('post');
  $('comparable').textContent=n+' / 8';$('mean-pre').textContent=pct(a);$('mean-post').textContent=pct(b);
  $('mean-change').textContent=n?((b-a)>0?'+':'')+num(b-a):'No comparable';
  $('mean-change').className=n?((b-a)*direction>=0?'good':'bad'):'muted';
@@ -80,9 +82,15 @@ function renderComparison(){
 async function loadComparison(){
  $('refresh-comparison').disabled=true;
  try{
-  const [calc,ref]=await Promise.all([request(queryPath({consulta:'comparativo',limite:100})),request(queryPath({consulta:'reportado',limite:100}))]);
-  summary=calc.filas;reported=ref.filas;renderComparison();
- }catch(e){summary=[];reported=[];renderComparison();$('connection').textContent=e.message}
+  const data=await request('/evaluacion/comparativo-supabase');
+  summary=data.calculados;reported=data.reportados;
+  const sqlOption=$('comparison-source').querySelector('option[value="sql"]');
+  sqlOption.disabled=!data.fuentes_disponibles.includes('SQL');
+  if(sqlOption.disabled)$('comparison-source').value='excel';
+  $('connection').className='notice';
+  $('connection').textContent='Comparativo conectado con Supabase · '+data.periodos+' periodos · '+data.semanas+' semanas · '+data.indicadores+' indicadores.';
+  renderComparison();
+ }catch(e){summary=[];reported=[];renderComparison();$('connection').className='notice error';$('connection').textContent=e.message}
  finally{$('refresh-comparison').disabled=false}
 }
 async function runQuery(reuse=false){
@@ -120,15 +128,11 @@ async function loadAudit(){
  }catch(e){$('audit-state').textContent=e.message}finally{$('refresh-audit').disabled=false}
 }
 async function initialize(){
- try{
-  const m=await request('/evaluacion/fuente');
-  if(m.version_calculo!=='2.1')throw new Error('Reinicie el backend local para aplicar la nueva separación de cálculo y validación.');
-  $('connection').textContent='Datos disponibles · '+m.conteos.map(x=>x.etapa+': '+x.registros+' movimientos ('+x.excluidos+' excluidos)').join(' · ');
-  await loadComparison();
- }catch(e){$('connection').textContent=e.message;$('connection').className='notice error';const link=el('a',' Volver al inicio de sesión');link.href='../login/';$('connection').append(link)}
+ $('comparison-source').value='excel';
+ await loadComparison();
 }
 $('query-form').addEventListener('submit',e=>{e.preventDefault();runQuery()});
-$('metric').addEventListener('change',()=>{$('comparison-source').value=$('metric').value==='eficiencia'?'excel':'sql';renderComparison()});
+$('metric').addEventListener('change',renderComparison);
 $('comparison-source').addEventListener('change',renderComparison);
 $('refresh-comparison').addEventListener('click',loadComparison);
 $('refresh-audit').addEventListener('click',loadAudit);
